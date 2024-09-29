@@ -1,7 +1,7 @@
 from typing import List, Tuple, Dict
 from openai import OpenAI
 from config import config
-from utils import get_human_readable_datetime, extract_content_between_tags
+from utils import get_human_readable_datetime, extract_content_between_tags, fix_footnotes
 import yaml
 import logging
 import os
@@ -126,7 +126,7 @@ class LLMHandler:
                 ],
                 max_tokens=2048
             )
-            return response
+            return fix_footnotes(response)
         except Exception as e:
             logger.error(f"Error in synthesize_answer: {str(e)}")
             return "I'm sorry, but I encountered an error while trying to generate an answer. Please try again later."

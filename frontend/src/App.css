@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f0f4f8;
+  color: #333;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.research-assistant {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  color: #3a86ff;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.input {
+  flex-grow: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #3a86ff;
+}
+
+.button {
+  background-color: #3a86ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #2a75e6;
+}
+
+.button:disabled {
+  background-color: #a0c4ff;
+  cursor: not-allowed;
+}
+
+.error {
+  background-color: #ffcccb;
+  border-left: 4px solid #ff6b6b;
+  color: #d63031;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
+
+.answer {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.answer h2 {
+  color: #3a86ff;
+  margin-bottom: 1rem;
+}
+
+.answer pre {
+  background-color: #2d3748;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.footnotes {
+  margin-top: 2rem;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 1rem;
+}
+
+.footnote {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.footnote sup {
+  margin-right: 0.5rem;
+  color: #3a86ff;
+}
+
+.footnote-backref {
+  margin-left: 0.5rem;
+  color: #3a86ff;
+  text-decoration: none;
+}
+
+.footnote-backref:hover {
+  text-decoration: underline;
+}
+
+.footnotes {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.footnotes ol {
+  padding-left: 1.5rem;
+}
+
+.footnotes li {
+  margin-bottom: 0.5rem;
+}
+
+.footnotes li p {
+  display: inline;
+}
+
+.footnote-backref {
+  margin-left: 0.5rem;
+  color: #3a86ff;
+  text-decoration: none;
+}
+
+.footnote-backref:hover {
+  text-decoration: underline;
+}
+
+.footnote sup::before {
+  content: "[";
+}
+
+.footnote sup::after {
+  content: "]";
+}
+
+.footnote-backref::before {
+  content: "[";
+}
+
+.footnote-backref::after {
+  content: "]";
+}

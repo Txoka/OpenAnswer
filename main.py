@@ -1,6 +1,7 @@
 import asyncio
 import sys
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Body
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -10,13 +11,13 @@ from config import config
 from utils import setup_logging, render_markdown
 import logging
 from contextlib import asynccontextmanager
+import subprocess
+import os
+
 
 # Setup logging
 setup_logging(log_file='app.log', log_level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-class Question(BaseModel):
-    content: str
 
 class ResearchAssistant:
     def __init__(self):
@@ -63,6 +64,13 @@ class ResearchAssistant:
             raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
 
+
+
+
+
+
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Create a single ResearchAssistant instance for the entire application
@@ -72,14 +80,31 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Adjust this to match your React app's URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class Question(BaseModel):
+    content: str
+
 @app.post("/api/answer")
-async def get_answer_for_question(question: Question):
+async def get_answer_for_question(question: Question = Body(...)):
     result = await app.state.research_assistant.research_and_answer(question.content)
     return result
 
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+def run_frontend():
+    os.chdir("frontend")
+    with open("frontend.log", "w") as out:
+        subprocess.Popen("npm start", shell=False, stdout=out, stderr=out)
+    os.chdir("..")
 
 def main():
     from uvicorn import Config, Server
@@ -92,9 +117,10 @@ def main():
         log_level="info"
     )
     server = Server(config=uvicorn_config)
+    
+    #run_frontend()
 
     asyncio.run(server.serve())
-
 
 if __name__ == "__main__":
     main()
