@@ -71,21 +71,15 @@ async def lifespan(app: FastAPI):
     await app.state.research_assistant.__aexit__(None, None, None)
 
 app = FastAPI(lifespan=lifespan)
-templates = Jinja2Templates(directory="templates")
 
 @app.post("/api/answer")
 async def get_answer_for_question(question: Question):
     result = await app.state.research_assistant.research_and_answer(question.content)
     return result
 
-@app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
-
 
 def main():
     from uvicorn import Config, Server
