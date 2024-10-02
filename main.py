@@ -1,20 +1,15 @@
 import asyncio
-import sys
 from fastapi import FastAPI, HTTPException, Request, Body
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from web_research import WebResearcher
 from llm_operations import LLMHandler
 from config import config
-from utils import setup_logging, render_markdown
+from utils import setup_logging
 import logging
 from contextlib import asynccontextmanager
-import subprocess
-import os
-import redis
-
+import redis.asyncio as aioredis
+from datetime import datetime, timedelta
 
 # Setup logging
 log_level = getattr(logging, config.logging.log_level, logging.INFO)
@@ -65,37 +60,66 @@ class ResearchAssistant:
             logger.error(f"Unexpected error: {str(e)}")
             raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
+class RateLimiter:
+    def __init__(self, redis_client: aioredis.Redis, ip_daily_limit: int, total_daily_limit: int):
+        self.redis = redis_client
+        self.ip_daily_limit = ip_daily_limit
+        self.total_daily_limit = total_daily_limit
+        self.total_key = "total_requests"
+        self.ip_key_prefix = "ip-requests:"
 
+    async def is_allowed(self, ip: str) -> bool:
+        pipeline = self.redis.pipeline()
+        
+        # Increment total requests
+        pipeline.incr(self.total_key)
+        # Set expiration for total requests to end of day
+        pipeline.expire(self.total_key, self.seconds_until_end_of_day())
+        
+        # Increment IP requests
+        ip_key = f"{self.ip_key_prefix}{ip}"
+        pipeline.incr(ip_key)
+        # Set expiration for IP requests to end of day
+        pipeline.expire(ip_key, self.seconds_until_end_of_day())
 
+        results = await pipeline.execute()
+        total_requests = results[0]
+        ip_requests = results[2]
 
-# Function to track requests per IP using Redis
-def track_requests(ip_address: str) -> bool:
-    # Define a unique key for each IP (e.g., "ip-requests:1.2.3.4")
-    redis_key = f"ip-requests:{ip_address}"
-    
-    # Check if the IP already has a request count
-    current_requests = redis_client.get(redis_key)
-    
-    if current_requests is None:
-        # First request, set the count to 1 and expire after 24 hours (86400 seconds)
-        redis_client.set(redis_key, 1, ex=86400)
+        if total_requests > self.total_daily_limit:
+            return False
+
+        if ip_requests > self.ip_daily_limit:
+            return False
+
         return True
-    elif int(current_requests) < 5:
-        # Increment the request count if under the limit
-        redis_client.incr(redis_key)
-        return True
-    else:
-        # Limit reached
-        return False
+
+    def seconds_until_end_of_day(self) -> int:
+        now = datetime.utcnow()
+        tomorrow = now + timedelta(days=1)
+        midnight = datetime(year=tomorrow.year, month=tomorrow.month, day=tomorrow.day)
+        return int((midnight - now).total_seconds())
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Print inside the lifespan
+    # Initialize Redis client
+    app.state.redis = aioredis.from_url(config.redis.redis_url, decode_responses=True)
     
-    # Create a single ResearchAssistant instance for the entire application
+    # Create RateLimiter instance
+    app.state.rate_limiter = RateLimiter(
+        redis_client=app.state.redis,
+        ip_daily_limit=config.rate_limits.ip_daily,
+        total_daily_limit=config.rate_limits.total_daily
+    )
+    
+    # Create ResearchAssistant instance
     app.state.research_assistant = await ResearchAssistant().__aenter__()
-    yield
-    await app.state.research_assistant.__aexit__(None, None, None)
+    
+    try:
+        yield
+    finally:
+        await app.state.research_assistant.__aexit__(None, None, None)
+        await app.state.redis.close()
 
 app = FastAPI(
     title="OpenAnswer Research Assistant API",
@@ -117,6 +141,17 @@ app.add_middleware(
 
 class Question(BaseModel):
     content: str
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    client_ip = request.client.host
+    rate_limiter: RateLimiter = request.app.state.rate_limiter
+    is_allowed = await rate_limiter.is_allowed(client_ip)
+    if not is_allowed:
+        logger.warning(f"Rate limit exceeded for IP: {client_ip}")
+        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    response = await call_next(request)
+    return response
 
 @app.post("/api/answer")
 async def get_answer_for_question(question: Question = Body(...)):
