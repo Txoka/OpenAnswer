@@ -61,7 +61,10 @@ export default function ResearchAssistant() {
   return (
     <div className="container">
       <div className="research-assistant">
+        {/* OpenAnswer label above the title */}
+        <span className="open-answer">OpenAnswer</span>
         <h1 className="title">Research Assistant</h1>
+
         <form onSubmit={handleSubmit} className="form">
           <input
             type="text"
@@ -79,11 +82,13 @@ export default function ResearchAssistant() {
             {loading ? 'Loading...' : 'Ask'}
           </button>
         </form>
+
         {error && (
           <div className="error">
             <p><strong>Error:</strong> {error}</p>
           </div>
         )}
+
         {(searchTerms.length > 0 || relevantUrls.length > 0) && (
           <div className="metadata">
             {searchTerms.length > 0 && (
@@ -110,6 +115,7 @@ export default function ResearchAssistant() {
             )}
           </div>
         )}
+
         {answer && (
           <div className="answer">
             <h2>Answer:</h2>
@@ -141,6 +147,10 @@ export default function ResearchAssistant() {
             </ReactMarkdown>
           </div>
         )}
+        {/* Powered by OpenAnswer */}
+        <div className="powered-by">
+          <p>Powered by <a href="https://github.com/Txoka/OpenAnswer" target="_blank" rel="noopener noreferrer">https://github.com/Txoka/OpenAnswer</a></p>
+        </div>
       </div>
     </div>
   );

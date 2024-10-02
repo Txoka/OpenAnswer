@@ -7,7 +7,7 @@ body {
 }
 
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 2rem;
 }
@@ -24,6 +24,7 @@ body {
   color: #3a86ff;
   text-align: center;
   margin-bottom: 2rem;
+  margin-top: 0;
 }
 
 .form {
@@ -96,71 +97,34 @@ body {
   overflow-x: auto;
 }
 
-.footnotes {
-  margin-top: 2rem;
-  border-top: 1px solid #e0e0e0;
-  padding-top: 1rem;
+a[data-footnote-ref="true"]::before {
+  content: "[";
 }
 
-.footnote {
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
+a[data-footnote-ref="true"]::after {
+  content: "]";
 }
 
-.footnote sup {
-  margin-right: 0.5rem;
-  color: #3a86ff;
+.open-answer {
+  font-size: 1.8rem;
+  color: gray;
+  display: block;
+  text-align: center;
 }
 
-.footnote-backref {
-  margin-left: 0.5rem;
-  color: #3a86ff;
-  text-decoration: none;
-}
-
-.footnote-backref:hover {
-  text-decoration: underline;
-}
-
-.footnotes {
+.powered-by {
   margin-top: 1rem;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  color: gray;
+  margin-bottom: -1rem;
+  text-align: center;
 }
 
-.footnotes ol {
-  padding-left: 1.5rem;
-}
-
-.footnotes li {
-  margin-bottom: 0.5rem;
-}
-
-.footnotes li p {
-  display: inline;
-}
-
-.footnote-backref {
-  margin-left: 0.5rem;
-  color: #3a86ff;
+.powered-by a {
+  color: inherit;
   text-decoration: none;
 }
 
-.footnote-backref:hover {
+.powered-by a:hover {
   text-decoration: underline;
-}
-
-.footnote sup::before {
-  content: "[";
-}
-
-.footnote sup::after {
-  content: "]";
-}
-
-.footnote-backref::before {
-  content: "[";
-}
-
-.footnote-backref::after {
-  content: "]";
 }

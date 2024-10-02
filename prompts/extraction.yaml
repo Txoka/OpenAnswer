@@ -12,8 +12,8 @@ system: |
 
   Format your response in markdown, using appropriate headings, bullet points, or numbered lists as needed.
 
-  If you find no relevant information, respond with:
-  <no_relevant_info>No relevant information found in this source.</no_relevant_info>
+  If you find no relevant information, respond **only** with:
+  [no_relevant_info]
 
   Current date: {date}
 

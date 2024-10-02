@@ -106,7 +106,7 @@ class LLMHandler:
                 max_tokens=1024
             )
             
-            if "<no_relevant_info>" in response:
+            if "[no_relevant_info]" in response:
                 return None
             return response
         except Exception as e:
@@ -114,7 +114,7 @@ class LLMHandler:
             return None
 
     def synthesize_answer(self, question: str, extracted_info: Dict[str, str]) -> str:
-        web_results_formatted = "\n\n".join([f"<url>\n{url}\n</url>\n<content>\n{content}\n</content>" for url, content in extracted_info.items()])
+        web_results_formatted = "\n\n".join([f"<url>{url}</url>\n<content>\n{content}\n</content>" for url, content in extracted_info.items()])
         formatted_prompt = self.prompt_manager.get_formatted_prompt("answer", web_results=web_results_formatted, question=question)
         
         try:
