@@ -10,7 +10,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Deploy
-FROM node:18-alpine
+FROM node:18-alpine AS deploy
 
 WORKDIR /app
 COPY --from=builder /app/build /app/build
