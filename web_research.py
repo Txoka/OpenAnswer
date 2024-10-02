@@ -10,10 +10,9 @@ from logging import Filter
 class NoApiKeysFilter(Filter):
     def filter(self, record):
         # Remove API keys or any other sensitive information from the logs
-        record.msg = record.msg.replace(config.api_keys.google_search_api_key.get_secret_value(), "[API_KEY]")
+        record.msg = record.msg.replace(config.api_keys.google_search_api_key.get_secret_value(), "[GOOGLE_SEARCH_API_KEY]")
         record.msg = record.msg.replace(config.search.search_engine_id.get_secret_value(), "[SEARCH_ENGINE_ID]")
         return True
-
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
@@ -66,7 +65,7 @@ class WebResearcher:
         extracted_info = await self.fetch_and_extract_content(relevant_urls, question)
         return extracted_info
 
-    async def search_web(self, queries: List[str], results_per_query: int = 10) -> List[SearchResult]:
+    async def search_web(self, queries: List[str], results_per_query: int = config.search.max_results) -> List[SearchResult]:
         all_results = []
         for query in queries:
             try:
