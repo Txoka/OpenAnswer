@@ -62,7 +62,7 @@ export default function ResearchAssistant() {
           // Convert seconds to dd:hh:mm format
           const retryTimeFormatted = formatTime(retryAfterSeconds);
   
-          setError(`Rate limit exceeded (${limitType} limit). Try again in ${retryTimeFormatted}.`);
+          setError(`${limitType} Rate limit exceeded. Try again in ${retryTimeFormatted}.`);
         } else {
           setError(`Error: ${errorData.detail || response.statusText}`);
         }
