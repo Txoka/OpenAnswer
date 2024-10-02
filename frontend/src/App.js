@@ -5,7 +5,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import './App.css';
 
-const API_ENDPOINT = 'http://localhost:8000/api/answer';
+const API_ENDPOINT = `${window.location.protocol}//${window.location.hostname}:8118/api/answer`;;
 
 // Custom components for footnotes
 const FootnoteReference = ({ identifier }) => <sup>[{identifier}]</sup>;
