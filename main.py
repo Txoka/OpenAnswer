@@ -100,6 +100,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+cors_headers = {
+    "Access-Control-Allow-Origin": config.cors.domain,  # Use the domain from your config
+    "Access-Control-Allow-Methods": "POST, GET",  # Only allow POST and GET
+    "Access-Control-Allow-Headers": "*",  # Allow all headers
+    "Access-Control-Allow-Credentials": "true"  # Enable credentials if allowed
+}
+
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
     if request.method == "OPTIONS":
@@ -114,14 +121,6 @@ async def rate_limit_middleware(request: Request, call_next):
         if not limit_status["allowed"]:
             limit_type = limit_status["exceeded"]
             retry_after = limit_status["retry_after"]
-            
-            # Extract CORS headers from CORSMiddleware
-            cors_headers = {
-                "Access-Control-Allow-Origin": config.cors.domain,  # Use the domain from your config
-                "Access-Control-Allow-Methods": "POST, GET",  # Only allow POST and GET
-                "Access-Control-Allow-Headers": "*",  # Allow all headers
-                "Access-Control-Allow-Credentials": "true"  # Enable credentials if allowed
-            }
 
             # Construct detailed response
             detail = {
