@@ -61,10 +61,11 @@ class ResearchAssistant:
             raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
 class RateLimiter:
-    def __init__(self, redis_client: aioredis.Redis, ip_daily_limit: int, total_daily_limit: int):
+    def __init__(self, redis_client: aioredis.Redis, per_ip_limit: int, total_limit: int, limit_interval: int):
         self.redis = redis_client
-        self.ip_daily_limit = ip_daily_limit
-        self.total_daily_limit = total_daily_limit
+        self.per_ip_limit = per_ip_limit
+        self.total_limit = total_limit
+        self.limit_interval = limit_interval
         self.total_key = "total_requests"
         self.ip_key_prefix = "ip-requests:"
 
@@ -74,31 +75,25 @@ class RateLimiter:
         # Increment total requests
         pipeline.incr(self.total_key)
         # Set expiration for total requests to end of day
-        pipeline.expire(self.total_key, self.seconds_until_end_of_day())
+        pipeline.expire(self.total_key, self.limit_interval)
         
         # Increment IP requests
         ip_key = f"{self.ip_key_prefix}{ip}"
         pipeline.incr(ip_key)
         # Set expiration for IP requests to end of day
-        pipeline.expire(ip_key, self.seconds_until_end_of_day())
+        pipeline.expire(ip_key, self.limit_interval)
 
         results = await pipeline.execute()
         total_requests = results[0]
         ip_requests = results[2]
 
-        if total_requests > self.total_daily_limit:
+        if total_requests > self.total_limit:
             return False
 
-        if ip_requests > self.ip_daily_limit:
+        if ip_requests > self.per_ip_limit:
             return False
 
         return True
-
-    def seconds_until_end_of_day(self) -> int:
-        now = datetime.utcnow()
-        tomorrow = now + timedelta(days=1)
-        midnight = datetime(year=tomorrow.year, month=tomorrow.month, day=tomorrow.day)
-        return int((midnight - now).total_seconds())
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -108,8 +103,8 @@ async def lifespan(app: FastAPI):
     # Create RateLimiter instance
     app.state.rate_limiter = RateLimiter(
         redis_client=app.state.redis,
-        ip_daily_limit=config.rate_limits.ip_daily,
-        total_daily_limit=config.rate_limits.total_daily
+        per_ip_limit=config.rate_limits.limit_per_ip,
+        total_limit=config.rate_limits.limit_total
     )
     
     # Create ResearchAssistant instance

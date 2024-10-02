@@ -45,8 +45,9 @@ class CORSSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
 class RateLimits(BaseSettings):
-    ip_daily: int
-    total_daily: int
+    limit_per_ip: int
+    limit_total: int
+    limit_interval: int
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
