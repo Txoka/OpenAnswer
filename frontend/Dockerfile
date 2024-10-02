@@ -1,16 +1,14 @@
 # Stage 1: Build
-FROM node:18-alpine AS builder
+FROM node:19-alpine AS builder
 
 WORKDIR /app
-COPY package*.json ./
-
-# Install dependencies and build
-RUN npm install
 COPY . .
-RUN npm run build
+
+RUN npm install
+RUN npm run build && test -d /app/build
 
 # Stage 2: Deploy
-FROM node:18-alpine AS deploy
+FROM node:19-alpine AS deploy
 
 WORKDIR /app
 COPY --from=builder /app/build /app/build
