@@ -1,5 +1,5 @@
 from typing import List, Tuple, Dict
-from openai import OpenAI
+from openai import AsyncOpenAI
 from config import config
 from utils import get_human_readable_datetime, extract_content_between_tags, fix_footnotes
 import yaml
@@ -35,12 +35,12 @@ class PromptManager:
 
 class LLMHandler:
     def __init__(self):
-        self.client = OpenAI(api_key=config.api_keys.openai_api_key.get_secret_value())
+        self.client = AsyncOpenAI(api_key=config.api_keys.openai_api_key.get_secret_value())
         self.prompt_manager = PromptManager()
 
     def _call_llm(self, model: str, messages: List[Dict[str, str]], temperature: float = 0.5, max_tokens: int = 150) -> str:
         try:
-            completion = self.client.chat.completions.create(
+            completion = await self.client.chat.completions.create(
                 model=model,
                 messages=messages,
                 temperature=temperature,

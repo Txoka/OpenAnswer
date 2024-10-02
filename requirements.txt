@@ -9,3 +9,5 @@ python-dotenv
 jinja2
 markdown
 beautifulsoup4
+slowapi
+redis

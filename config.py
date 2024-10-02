@@ -39,12 +39,24 @@ class APISettings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
+class CORSSettings(BaseSettings):
+    domain: str
+
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
+
+class RateLimits(BaseSettings):
+    ip_daily: str
+
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
+
 class Config(BaseSettings):
     api_keys: APIKeys = Field(default_factory=APIKeys)
     search: SearchSettings = Field(default_factory=SearchSettings)
     models: ModelSettings = Field(default_factory=ModelSettings)
     crawler: CrawlerSettings = Field(default_factory=CrawlerSettings)
     api: APISettings = Field(default_factory=APISettings)
+    cors: CORSSettings = Field(default_factory=CORSSettings)
+    rate_limits: RateLimits = Field(default_factory=RateLimits)
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
@@ -55,6 +67,8 @@ class Config(BaseSettings):
             "models": self.models.model_dump(),
             "crawler": self.crawler.model_dump(),
             "api": self.api.model_dump(),
+            "cors": self.cors.model_dump(),
+            "rate_limits": self.rate_limits.model_dump()
         }
 
 config = Config()

@@ -13,6 +13,7 @@ import logging
 from contextlib import asynccontextmanager
 import subprocess
 import os
+import redis
 
 
 # Setup logging
@@ -69,10 +70,30 @@ class ResearchAssistant:
 
 
 
-
+# Function to track requests per IP using Redis
+def track_requests(ip_address: str) -> bool:
+    # Define a unique key for each IP (e.g., "ip-requests:1.2.3.4")
+    redis_key = f"ip-requests:{ip_address}"
+    
+    # Check if the IP already has a request count
+    current_requests = redis_client.get(redis_key)
+    
+    if current_requests is None:
+        # First request, set the count to 1 and expire after 24 hours (86400 seconds)
+        redis_client.set(redis_key, 1, ex=86400)
+        return True
+    elif int(current_requests) < 5:
+        # Increment the request count if under the limit
+        redis_client.incr(redis_key)
+        return True
+    else:
+        # Limit reached
+        return False
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Print inside the lifespan
+    
     # Create a single ResearchAssistant instance for the entire application
     app.state.research_assistant = await ResearchAssistant().__aenter__()
     yield
@@ -82,9 +103,9 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Adjust this to match your React app's URL
+    allow_origins=[config.cors.domain],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )
 
@@ -107,7 +128,7 @@ def main():
         app="main:app",
         host=config.api.api_host,
         port=config.api.api_port,
-        reload=True,
+        reload=False,
         log_level="info"
     )
     server = Server(config=uvicorn_config)
