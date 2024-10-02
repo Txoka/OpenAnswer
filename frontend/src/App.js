@@ -79,7 +79,11 @@ export default function ResearchAssistant() {
             disabled={loading}
             className="button"
           >
-            {loading ? 'Loading...' : 'Ask'}
+            {loading ? (
+              <div className="spinner"></div>
+            ) : (
+              'Ask'
+            )}
           </button>
         </form>
 

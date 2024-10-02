@@ -17,7 +17,8 @@ import redis
 
 
 # Setup logging
-setup_logging(log_file='app.log', log_level=logging.INFO)
+log_level = getattr(logging, config.logging.log_level, logging.INFO)
+setup_logging(log_file='app.log', log_level=log_level)
 logger = logging.getLogger(__name__)
 
 class ResearchAssistant:
@@ -102,7 +103,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
     docs_url=None,  # Disable Swagger UI
-    redoc_url=None  # Disable ReDoc UI
+    redoc_url=None,  # Disable ReDoc UI
+    openapi_url=None, # Disable OpenAPI
 )
 
 app.add_middleware(

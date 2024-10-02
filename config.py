@@ -45,7 +45,18 @@ class CORSSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
 class RateLimits(BaseSettings):
-    ip_daily: str
+    ip_daily: int
+    total_daily: int
+
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
+
+class LoggingSettings(BaseSettings):
+    log_level: str
+
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
+
+class RedisSettings(BaseSettings):
+    redis_url: str
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
@@ -57,6 +68,8 @@ class Config(BaseSettings):
     api: APISettings = Field(default_factory=APISettings)
     cors: CORSSettings = Field(default_factory=CORSSettings)
     rate_limits: RateLimits = Field(default_factory=RateLimits)
+    logging: LoggingSettings = Field(default_factory=LoggingSettings)
+    redis: RedisSettings = Field(default_factory=RedisSettings)
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
@@ -68,7 +81,9 @@ class Config(BaseSettings):
             "crawler": self.crawler.model_dump(),
             "api": self.api.model_dump(),
             "cors": self.cors.model_dump(),
-            "rate_limits": self.rate_limits.model_dump()
+            "rate_limits": self.rate_limits.model_dump(),
+            "logging": self.logging.model_dump(),
+            "redis": self.redis.model_dump()
         }
 
 config = Config()

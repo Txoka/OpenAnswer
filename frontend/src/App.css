@@ -56,6 +56,10 @@ body {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
 }
 
 .button:hover {
@@ -65,6 +69,22 @@ body {
 .button:disabled {
   background-color: #a0c4ff;
   cursor: not-allowed;
+}
+
+/* Spinner Styles */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 3px solid white;
+  border-top: 3px solid #2a75e6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Spinner Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .error {
@@ -128,3 +148,4 @@ a[data-footnote-ref="true"]::after {
 .powered-by a:hover {
   text-decoration: underline;
 }
+
