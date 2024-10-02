@@ -83,7 +83,7 @@ export default function ResearchAssistant() {
       
     } catch (err) {
       console.error('Error details:', err);
-      setError('An error occurred while fetching the answer. Please try again.');
+      setError('An error occurred while fetching the answer. Please try again later.');
     } finally {
       setLoading(false);
     }
