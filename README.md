@@ -1,18 +1,12 @@
 # TODO List
 
 ## Backend
-- [ ] **Implement Redis-based rate limiting**  
-  Integrate Redis into the FastAPI backend to enforce rate limiting using `AIORedis` for async operations. This will help prevent overloading the API with too many requests in a short time.
+- [ ] **Implement Redis-based rate limiting**
+  Integrate Redis for controlling the rate at which users can access the API. This should be based on an asynchronous Redis client to ensure non-blocking operations.
 
-- [ ] **Add rate limit API responses**  
-  Ensure that appropriate HTTP responses (e.g., `429 Too Many Requests`) are sent when the rate limit is exceeded. The response should include details about when the user can try again (e.g., retry after X seconds).
+- [ ] **Add rate limit API responses**
+  Ensure proper responses (e.g., `429 Too Many Requests`) are returned when rate limits are exceeded. Include details such as retry times to guide users on when they can attempt another request.
 
 ## Frontend
-- [ ] **Add frontend messages for rate limiting**  
-  Display user-friendly error messages on the frontend when the API rate limit is hit. Messages should explain the reason for the block and how long the user should wait before retrying.
-
----
-
-### Notes:
-- The rate limiting feature will improve performance and protect the backend from abuse.
-- The Redis setup should be properly documented for local and production environments.
+- [ ] **Add frontend messages for rate limiting**
+  Display clear and concise error messages on the frontend when users hit the rate limit. Messages should include retry timing information for a better user experience.
