@@ -8,5 +8,5 @@
   Ensure proper responses (e.g., `429 Too Many Requests`) are returned when rate limits are exceeded. Include details such as retry times to guide users on when they can attempt another request.
 
 ## Frontend
-- [ ] **Add frontend messages for rate limiting**
+- [x] **Add frontend messages for rate limiting**
   Display clear and concise error messages on the frontend when users hit the rate limit. Messages should include retry timing information for a better user experience.

@@ -11,6 +11,21 @@ const API_ENDPOINT = 'http://localhost:8000/api/answer';
 const FootnoteReference = ({ identifier }) => <sup>[{identifier}]</sup>;
 const FootnoteBackReference = ({ identifier }) => <a href={`#fnref-${identifier}`} className="footnote-backref">↩</a>;
 
+function formatTime(seconds) {
+  const days = Math.floor(seconds / (24 * 60 * 60));
+  const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
+  const minutes = Math.floor((seconds % (60 * 60)) / 60);
+  const secs = seconds % 60;
+
+  let timeString = '';
+  if (days > 0) timeString += `${days}d `;
+  if (hours > 0) timeString += `${hours}h `;
+  if (minutes > 0) timeString += `${minutes}m `;
+  timeString += `${secs}s`;
+
+  return timeString.trim();
+}
+
 export default function ResearchAssistant() {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -38,18 +53,34 @@ export default function ResearchAssistant() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Try to parse the error response once
+        const errorData = await response.json();
+        if (response.status === 429) {
+          const retryAfterSeconds = errorData.retry_after_seconds || response.headers.get('Retry-After');
+          const limitType = errorData.limit_type || 'unknown';
+          
+          // Convert seconds to dd:hh:mm format
+          const retryTimeFormatted = formatTime(retryAfterSeconds);
+  
+          setError(`Rate limit exceeded (${limitType} limit). Try again in ${retryTimeFormatted}.`);
+        } else {
+          setError(`Error: ${errorData.detail || response.statusText}`);
+        }
+      } else {
+        const data = await response.json();
+      
+        if (data.answer) {
+          setAnswer(data.answer);
+          setSearchTerms(data.search_terms || []);
+          setRelevantUrls(data.relevant_urls || []);
+        } else if (data.status_code) {
+          setError(data.status_code);
+        } else {
+          throw new Error('Unexpected response format');
+        }
       }
 
-      const data = await response.json();
       
-      if (data.answer) {
-        setAnswer(data.answer);
-        setSearchTerms(data.search_terms || []);
-        setRelevantUrls(data.relevant_urls || []);
-      } else {
-        throw new Error('Unexpected response format');
-      }
     } catch (err) {
       console.error('Error details:', err);
       setError('An error occurred while fetching the answer. Please try again.');
@@ -151,7 +182,7 @@ export default function ResearchAssistant() {
             </ReactMarkdown>
           </div>
         )}
-        {/* Powered by OpenAnswer */}
+        
         <div className="powered-by">
           <p>Powered by <a href="https://github.com/Txoka/OpenAnswer" target="_blank" rel="noopener noreferrer">https://github.com/Txoka/OpenAnswer</a></p>
         </div>

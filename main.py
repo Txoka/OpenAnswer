@@ -8,8 +8,8 @@ from config import config
 from utils import setup_logging
 import logging
 from contextlib import asynccontextmanager
-import redis.asyncio as aioredis
-from datetime import datetime, timedelta
+from fastapi.responses import JSONResponse
+from rate_limiter import RateLimiter, aioredis
 
 # Setup logging
 log_level = getattr(logging, config.logging.log_level, logging.INFO)
@@ -60,41 +60,6 @@ class ResearchAssistant:
             logger.error(f"Unexpected error: {str(e)}")
             raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
-class RateLimiter:
-    def __init__(self, redis_client: aioredis.Redis, per_ip_limit: int, total_limit: int, limit_interval: int):
-        self.redis = redis_client
-        self.per_ip_limit = per_ip_limit
-        self.total_limit = total_limit
-        self.limit_interval = limit_interval
-        self.total_key = "total_requests"
-        self.ip_key_prefix = "ip-requests:"
-
-    async def is_allowed(self, ip: str) -> bool:
-        pipeline = self.redis.pipeline()
-        
-        # Increment total requests
-        pipeline.incr(self.total_key)
-        # Set expiration for total requests to end of day
-        pipeline.expire(self.total_key, self.limit_interval)
-        
-        # Increment IP requests
-        ip_key = f"{self.ip_key_prefix}{ip}"
-        pipeline.incr(ip_key)
-        # Set expiration for IP requests to end of day
-        pipeline.expire(ip_key, self.limit_interval)
-
-        results = await pipeline.execute()
-        total_requests = results[0]
-        ip_requests = results[2]
-
-        if total_requests > self.total_limit:
-            return False
-
-        if ip_requests > self.per_ip_limit:
-            return False
-
-        return True
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize Redis client
@@ -124,7 +89,7 @@ app = FastAPI(
     lifespan=lifespan,
     docs_url=None,  # Disable Swagger UI
     redoc_url=None,  # Disable ReDoc UI
-    openapi_url=None, # Disable OpenAPI
+    openapi_url=None # Disable OpenAPI
 )
 
 app.add_middleware(
@@ -135,19 +100,51 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class Question(BaseModel):
-    content: str
-
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
-    client_ip = request.client.host
-    rate_limiter: RateLimiter = request.app.state.rate_limiter
-    is_allowed = await rate_limiter.is_allowed(client_ip)
-    if not is_allowed:
-        logger.warning(f"Rate limit exceeded for IP: {client_ip}")
-        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
+    # Apply rate limiting only to /api/answer
+    if request.url.path == "/api/answer":
+        client_ip = request.client.host
+        rate_limiter: RateLimiter = request.app.state.rate_limiter
+        limit_status = await rate_limiter.check_limits(client_ip)
+        
+        if not limit_status["allowed"]:
+            limit_type = limit_status["exceeded"]
+            retry_after = limit_status["retry_after"]
+            
+            # Extract CORS headers from CORSMiddleware
+            cors_headers = {
+                "Access-Control-Allow-Origin": config.cors.domain,  # Use the domain from your config
+                "Access-Control-Allow-Methods": "POST, GET",  # Only allow POST and GET
+                "Access-Control-Allow-Headers": "*",  # Allow all headers
+                "Access-Control-Allow-Credentials": "true"  # Enable credentials if allowed
+            }
+
+            # Construct detailed response
+            detail = {
+                "detail": "Rate limit exceeded",
+                "limit_type": limit_type.upper(),
+                "retry_after_seconds": retry_after
+            }
+            return JSONResponse(
+                status_code=429,
+                content=detail,
+                headers={
+                    "Retry-After": str(retry_after),
+                    **cors_headers  # Dynamically include CORS headers
+                }
+            )
+    
+    # Proceed with the request if rate limits are not exceeded or for other paths
     response = await call_next(request)
     return response
+
+
+class Question(BaseModel):
+    content: str
 
 @app.post("/api/answer")
 async def get_answer_for_question(question: Question = Body(...)):
