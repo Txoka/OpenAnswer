@@ -38,7 +38,7 @@ class LLMHandler:
         self.client = AsyncOpenAI(api_key=config.api_keys.openai_api_key.get_secret_value())
         self.prompt_manager = PromptManager()
 
-    def _call_llm(self, model: str, messages: List[Dict[str, str]], temperature: float = 0.5, max_tokens: int = 150) -> str:
+    async def _call_llm(self, model: str, messages: List[Dict[str, str]], temperature: float = 0.5, max_tokens: int = 150) -> str:
         try:
             completion = await self.client.chat.completions.create(
                 model=model,
@@ -51,11 +51,11 @@ class LLMHandler:
             logger.error(f"Error calling LLM: {str(e)}")
             raise
 
-    def generate_search_queries(self, question: str) -> Tuple[List[str], List[str]]:
+    async def generate_search_queries(self, question: str) -> Tuple[List[str], List[str]]:
         formatted_prompt = self.prompt_manager.get_formatted_prompt("search_term", question=question)
         
         try:
-            response = self._call_llm(
+            response = await self._call_llm(
                 config.models.search_model,
                 [
                     {"role": "system", "content": formatted_prompt['system']},
@@ -74,11 +74,11 @@ class LLMHandler:
             logger.error(f"Error in generate_search_queries: {str(e)}")
             return [], []
 
-    def filter_relevant_results(self, results: List[Dict[str, str]], question: str) -> List[str]:
+    async def filter_relevant_results(self, results: List[Dict[str, str]], question: str) -> List[str]:
         formatted_prompt = self.prompt_manager.get_formatted_prompt("url_selection", question=question, search_results=results)
         
         try:
-            response = self._call_llm(
+            response = await self._call_llm(
                 config.models.search_model,
                 [
                     {"role": "system", "content": formatted_prompt['system']},
@@ -93,11 +93,11 @@ class LLMHandler:
             logger.error(f"Error in filter_relevant_results: {str(e)}")
             return []
 
-    def extract_relevant_info(self, question: str, content: str, url: str) -> str:
+    async def extract_relevant_info(self, question: str, content: str, url: str) -> str:
         formatted_prompt = self.prompt_manager.get_formatted_prompt("extraction", question=question, web_content=content, url=url)
         
         try:
-            response = self._call_llm(
+            response = await self._call_llm(
                 config.models.extract_model,
                 [
                     {"role": "system", "content": formatted_prompt['system']},
@@ -113,12 +113,12 @@ class LLMHandler:
             logger.error(f"Error in extract_relevant_info: {str(e)}")
             return None
 
-    def synthesize_answer(self, question: str, extracted_info: Dict[str, str]) -> str:
+    async def synthesize_answer(self, question: str, extracted_info: Dict[str, str]) -> str:
         web_results_formatted = "\n\n".join([f"<url>{url}</url>\n<content>\n{content}\n</content>" for url, content in extracted_info.items()])
         formatted_prompt = self.prompt_manager.get_formatted_prompt("answer", web_results=web_results_formatted, question=question)
         
         try:
-            response = self._call_llm(
+            response = await self._call_llm(
                 config.models.answer_model,
                 [
                     {"role": "system", "content": formatted_prompt['system']},

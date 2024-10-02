@@ -35,7 +35,7 @@ class ResearchAssistant:
     async def research_and_answer(self, question: str) -> dict:
         try:
             # Generate search queries
-            search_terms, custom_urls = self.llm_handler.generate_search_queries(question)
+            search_terms, custom_urls = await self.llm_handler.generate_search_queries(question)
             if not search_terms and not custom_urls:
                 raise ValueError("Failed to generate search terms")
             logger.info(f"Generated search terms: {search_terms}")
@@ -47,7 +47,7 @@ class ResearchAssistant:
                 raise ValueError("Failed to extract relevant information")
             
             # Synthesize answer
-            answer = self.llm_handler.synthesize_answer(question, extracted_info)
+            answer = await self.llm_handler.synthesize_answer(question, extracted_info)
             if not answer:
                 raise ValueError("Failed to generate an answer")
 
@@ -63,9 +63,6 @@ class ResearchAssistant:
         except Exception as e:
             logger.error(f"Unexpected error: {str(e)}")
             raise HTTPException(status_code=500, detail="An unexpected error occurred")
-
-
-
 
 
 
@@ -99,7 +96,14 @@ async def lifespan(app: FastAPI):
     yield
     await app.state.research_assistant.__aexit__(None, None, None)
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="OpenAnswer Research Assistant API",
+    description="This API provides answers to user questions by performing web research and utilizing large language models (LLMs) to synthesize responses.",
+    version="1.0.0",
+    lifespan=lifespan,
+    docs_url=None,  # Disable Swagger UI
+    redoc_url=None  # Disable ReDoc UI
+)
 
 app.add_middleware(
     CORSMiddleware,

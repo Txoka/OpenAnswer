@@ -22,3 +22,19 @@ Exception: Connection closed while reading from the driver
 2024-10-02 07:58:39,157 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
 2024-10-02 07:59:06,026 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
 2024-10-02 07:59:40,423 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-02 08:15:55,017 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2024-10-02 08:16:02,548 - main - ERROR - Research process failed: Failed to generate search terms
+2024-10-02 08:21:22,759 - main - ERROR - Unexpected error: cannot unpack non-iterable coroutine object
+2024-10-02 08:23:27,649 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-02 08:23:27,653 - main - INFO - Generated search terms: ['test']
+2024-10-02 08:23:27,653 - main - INFO - Custom URLs: []
+2024-10-02 08:23:31,524 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-02 08:23:32,009 - httpx - INFO - HTTP Request: GET https://www.googleapis.com/customsearch/v1?q=test&cx=f2ae843af52fb4ff3&key=AIzaSyAhv3y8d5hcKL4W_O9IC8iTYp7txYItW3g&num=10 "HTTP/1.1 200 OK"
+2024-10-02 08:23:33,278 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-02 08:23:36,998 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-02 08:23:37,346 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-02 08:23:37,627 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-02 08:23:38,519 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-02 08:23:38,946 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-02 08:23:42,205 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-02 08:23:49,396 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
