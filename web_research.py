@@ -5,9 +5,23 @@ from config import config
 from crawl4ai import AsyncWebCrawler
 from llm_operations import LLMHandler
 import logging
+from logging import Filter
+
+class NoApiKeysFilter(Filter):
+    def filter(self, record):
+        # Remove API keys or any other sensitive information from the logs
+        record.msg = record.msg.replace(config.api_keys.google_search_api_key.get_secret_value(), "[API_KEY]")
+        record.msg = record.msg.replace(config.search.search_engine_id.get_secret_value(), "[SEARCH_ENGINE_ID]")
+        return True
+
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
+logger.addFilter(NoApiKeysFilter())
+
+httpx_logger = logging.getLogger("httpx")
+httpx_logger.setLevel(logging.WARNING)
+httpx_logger.addFilter(NoApiKeysFilter())
 
 class SearchResult(NamedTuple):
     title: str
@@ -20,14 +34,18 @@ class WebResearcher:
         self.search_engine_id = config.search.search_engine_id.get_secret_value()
         self.llm_handler = LLMHandler()
         self.crawler = AsyncWebCrawler(verbose=False)
+        self.httpx_client = httpx.AsyncClient()
 
     async def __aenter__(self):
         await self.crawler.__aenter__()
+        await self.httpx_client.__aenter__()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if self.crawler:
             await self.crawler.__aexit__(exc_type, exc_val, exc_tb)
+        if self.httpx_client:
+            await self.httpx_client.__aexit__(exc_type, exc_val, exc_tb)
 
     async def research(self, question: str) -> Dict[str, str]:
         search_terms, custom_urls = await self.llm_handler.generate_search_queries(question)
@@ -50,29 +68,28 @@ class WebResearcher:
 
     async def search_web(self, queries: List[str], results_per_query: int = 10) -> List[SearchResult]:
         all_results = []
-        async with httpx.AsyncClient() as client:
-            for query in queries:
-                try:
-                    url = "https://www.googleapis.com/customsearch/v1"
-                    params = {
-                        "q": query,
-                        "cx": self.search_engine_id,
-                        "key": self.api_key,
-                        "num": results_per_query
-                    }
-                    response = await client.get(url, params=params)
-                    response.raise_for_status()  # Raise an exception for a failed request
-                    search_results = response.json()
-                    for item in search_results.get('items', []):
-                        result = SearchResult(
-                            title=item['title'],
-                            url=item['link'],
-                            snippet=item['snippet']
-                        )
-                        if result not in all_results:
-                            all_results.append(result)
-                except Exception as e:
-                    logger.error(f"Error searching for '{query}': {str(e)}")
+        for query in queries:
+            try:
+                url = "https://www.googleapis.com/customsearch/v1"
+                params = {
+                    "q": query,
+                    "cx": self.search_engine_id,
+                    "key": self.api_key,
+                    "num": results_per_query
+                }
+                response = await self.httpx_client.get(url, params=params)
+                response.raise_for_status()  # Raise an exception for a failed request
+                search_results = response.json()
+                for item in search_results.get('items', []):
+                    result = SearchResult(
+                        title=item['title'],
+                        url=item['link'],
+                        snippet=item['snippet']
+                    )
+                    if result not in all_results:
+                        all_results.append(result)
+            except Exception as e:
+                logger.error(f"Error searching for '{query}': {str(e)}")
 
         return all_results
 
