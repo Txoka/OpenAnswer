@@ -70,7 +70,7 @@ export default function ResearchAssistant() {
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Enter your question"
+            placeholder="Enter your question or request"
             className="input"
             required
           />

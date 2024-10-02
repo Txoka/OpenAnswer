@@ -113,7 +113,7 @@ a[data-footnote-ref="true"]::after {
 }
 
 .powered-by {
-  margin-top: 1rem;
+  margin-top: 3rem;
   font-size: 0.8rem;
   color: gray;
   margin-bottom: -1rem;

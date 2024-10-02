@@ -100,12 +100,6 @@ async def get_answer_for_question(question: Question = Body(...)):
 async def health_check():
     return {"status": "healthy"}
 
-def run_frontend():
-    os.chdir("frontend")
-    with open("frontend.log", "w") as out:
-        subprocess.Popen("npm start", shell=False, stdout=out, stderr=out)
-    os.chdir("..")
-
 def main():
     from uvicorn import Config, Server
 
@@ -118,8 +112,6 @@ def main():
     )
     server = Server(config=uvicorn_config)
     
-    #run_frontend()
-
     asyncio.run(server.serve())
 
 if __name__ == "__main__":
