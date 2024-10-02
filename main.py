@@ -104,7 +104,8 @@ async def lifespan(app: FastAPI):
     app.state.rate_limiter = RateLimiter(
         redis_client=app.state.redis,
         per_ip_limit=config.rate_limits.limit_per_ip,
-        total_limit=config.rate_limits.limit_total
+        total_limit=config.rate_limits.limit_total,
+        limit_interval=config.rate_limits.limit_interval
     )
     
     # Create ResearchAssistant instance
