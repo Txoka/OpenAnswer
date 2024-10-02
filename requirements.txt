@@ -11,3 +11,4 @@ markdown
 beautifulsoup4
 slowapi
 redis
+pydantic_settings
