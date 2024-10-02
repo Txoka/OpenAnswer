@@ -61,6 +61,13 @@ class RedisSettings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
+class ProxySettings(BaseSettings):
+    use_proxy: bool
+    proxy_domain: str
+    proxy_ip: str
+
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
+
 class Config(BaseSettings):
     api_keys: APIKeys = Field(default_factory=APIKeys)
     search: SearchSettings = Field(default_factory=SearchSettings)
@@ -71,6 +78,7 @@ class Config(BaseSettings):
     rate_limits: RateLimits = Field(default_factory=RateLimits)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
+    proxy: ProxySettings = Field(default_factory=ProxySettings)
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
@@ -84,7 +92,8 @@ class Config(BaseSettings):
             "cors": self.cors.model_dump(),
             "rate_limits": self.rate_limits.model_dump(),
             "logging": self.logging.model_dump(),
-            "redis": self.redis.model_dump()
+            "redis": self.redis.model_dump(),
+            "proxy": self.proxy.model_dump()
         }
 
 config = Config()

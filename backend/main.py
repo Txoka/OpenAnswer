@@ -1,6 +1,7 @@
 import asyncio
 from fastapi import FastAPI, HTTPException, Request, Body
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
 from pydantic import BaseModel
 from web_research import WebResearcher
 from llm_operations import LLMHandler
@@ -99,6 +100,12 @@ app.add_middleware(
     allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )
+
+if config.proxy.use_proxy:
+    app.add_middleware(
+        ProxyHeadersMiddleware,
+        trusted_hosts=[config.proxy.proxy_domain, config.proxy.proxy_ip],  # Add your proxy IP/hostname here
+    )
 
 cors_headers = {
     "Access-Control-Allow-Origin": config.cors.domain,  # Use the domain from your config

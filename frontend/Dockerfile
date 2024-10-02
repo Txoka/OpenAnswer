@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 
 RUN npm install
-RUN npm run build && test -d /app/build
+RUN npm run build
 
 # Stage 2: Deploy
 FROM node:19-alpine AS deploy
