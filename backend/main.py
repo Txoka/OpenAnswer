@@ -128,6 +128,8 @@ async def rate_limit_middleware(request: Request, call_next):
         # Use request.client.host to get the client IP
         # This will be automatically updated by ProxyHeadersMiddleware if a proxy is used
         client_ip = request.client.host
+        if config.proxy.use_proxy:
+            client_ip = request.headers.get('X-Real-IP')
 
         # Your rate limiter logic
         rate_limiter: RateLimiter = request.app.state.rate_limiter
