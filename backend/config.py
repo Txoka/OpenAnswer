@@ -63,8 +63,6 @@ class RedisSettings(BaseSettings):
 
 class ProxySettings(BaseSettings):
     use_proxy: bool
-    proxy_domain: str
-    proxy_ip: str
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
