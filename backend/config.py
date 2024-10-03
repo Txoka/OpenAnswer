@@ -28,8 +28,8 @@ class ModelSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
 class CrawlerSettings(BaseSettings):
-    max_urls: int = 5
-    crawl_timeout: int = 60
+    max_urls: int = 10
+    crawl_timeout: int = 30
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
