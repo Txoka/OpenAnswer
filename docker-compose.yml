@@ -32,7 +32,7 @@ services:
     ports:
       - "3000:3000"  # Exposes frontend on host port 3000
     depends_on:
-      - backend  # No circular dependency
+      - backend
 
 volumes:
   redis-data:
