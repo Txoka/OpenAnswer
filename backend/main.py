@@ -93,6 +93,13 @@ app = FastAPI(
     openapi_url=None # Disable OpenAPI
 )
 
+# Add ProxyHeadersMiddleware if proxy is used
+if config.proxy.use_proxy:
+    app.add_middleware(
+        ProxyHeadersMiddleware,
+        trusted_hosts=[config.proxy.proxy_domain, config.proxy.proxy_ip],  # Trusted proxy hosts
+    )
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -101,13 +108,6 @@ app.add_middleware(
     allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )
-
-# Add ProxyHeadersMiddleware if proxy is used
-if config.proxy.use_proxy:
-    app.add_middleware(
-        ProxyHeadersMiddleware,
-        trusted_hosts=[config.proxy.proxy_domain, config.proxy.proxy_ip],  # Trusted proxy hosts
-    )
 
 # Define CORS headers to dynamically add in responses
 cors_headers = {
