@@ -93,6 +93,7 @@ app = FastAPI(
     openapi_url=None # Disable OpenAPI
 )
 
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[config.cors.domain],
@@ -101,19 +102,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add ProxyHeadersMiddleware if proxy is used
 if config.proxy.use_proxy:
     app.add_middleware(
         ProxyHeadersMiddleware,
-        trusted_hosts=[config.proxy.proxy_domain, config.proxy.proxy_ip],  # Add your proxy IP/hostname here
+        trusted_hosts=[config.proxy.proxy_domain, config.proxy.proxy_ip],  # Trusted proxy hosts
     )
 
+# Define CORS headers to dynamically add in responses
 cors_headers = {
-    "Access-Control-Allow-Origin": config.cors.domain,  # Use the domain from your config
-    "Access-Control-Allow-Methods": "POST, GET",  # Only allow POST and GET
-    "Access-Control-Allow-Headers": "*",  # Allow all headers
-    "Access-Control-Allow-Credentials": "true"  # Enable credentials if allowed
+    "Access-Control-Allow-Origin": config.cors.domain,
+    "Access-Control-Allow-Methods": "POST, GET",
+    "Access-Control-Allow-Headers": "*",
+    "Access-Control-Allow-Credentials": "true"
 }
 
+# Rate limiting middleware
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
     if request.method == "OPTIONS":
@@ -121,10 +125,14 @@ async def rate_limit_middleware(request: Request, call_next):
 
     # Apply rate limiting only to /api/answer
     if request.url.path == "/api/answer":
+        # Use request.client.host to get the client IP
+        # This will be automatically updated by ProxyHeadersMiddleware if a proxy is used
         client_ip = request.client.host
+
+        # Your rate limiter logic
         rate_limiter: RateLimiter = request.app.state.rate_limiter
         limit_status = await rate_limiter.check_limits(client_ip)
-        
+
         if not limit_status["allowed"]:
             limit_type = limit_status["exceeded"]
             retry_after = limit_status["retry_after"]
@@ -140,10 +148,10 @@ async def rate_limit_middleware(request: Request, call_next):
                 content=detail,
                 headers={
                     "Retry-After": str(retry_after),
-                    **cors_headers  # Dynamically include CORS headers
+                    **cors_headers  # Include CORS headers
                 }
             )
-    
+
     # Proceed with the request if rate limits are not exceeded or for other paths
     response = await call_next(request)
     return response
