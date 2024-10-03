@@ -11,6 +11,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
 from rate_limiter import RateLimiter, aioredis
+from ipaddress import ip_network, ip_address
 
 # Setup logging
 log_level = getattr(logging, config.logging.log_level, logging.INFO)
@@ -110,6 +111,17 @@ cors_headers = {
     "Access-Control-Allow-Credentials": "true"
 }
 
+LOCAL_NETS = [
+    ip_network("192.168.0.0/16"),
+    ip_network("10.0.0.0/8"),
+    ip_network("172.16.0.0/12")
+]
+
+def is_local_network(ip: str):
+    """Check if the IP address belongs to a local network."""
+    ip_obj = ip_address(ip)
+    return any(ip_obj in net for net in LOCAL_NETS)
+
 # Rate limiting middleware
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
@@ -124,28 +136,28 @@ async def rate_limit_middleware(request: Request, call_next):
         if config.proxy.use_proxy:
             client_ip = request.headers.get('X-Real-IP')
 
-        # Your rate limiter logic
-        rate_limiter: RateLimiter = request.app.state.rate_limiter
-        limit_status = await rate_limiter.check_limits(client_ip)
+        if config.rate_limits.enforce_limit_in_localnet or not is_local_network(client_ip):
+            rate_limiter: RateLimiter = request.app.state.rate_limiter
+            limit_status = await rate_limiter.check_limits(client_ip)
 
-        if not limit_status["allowed"]:
-            limit_type = limit_status["exceeded"]
-            retry_after = limit_status["retry_after"]
+            if not limit_status["allowed"]:
+                limit_type = limit_status["exceeded"]
+                retry_after = limit_status["retry_after"]
 
-            # Construct detailed response
-            detail = {
-                "detail": "Rate limit exceeded",
-                "limit_type": limit_type.upper(),
-                "retry_after_seconds": retry_after
-            }
-            return JSONResponse(
-                status_code=429,
-                content=detail,
-                headers={
-                    "Retry-After": str(retry_after),
-                    **cors_headers  # Include CORS headers
+                # Construct detailed response
+                detail = {
+                    "detail": "Rate limit exceeded",
+                    "limit_type": limit_type.upper(),
+                    "retry_after_seconds": retry_after
                 }
-            )
+                return JSONResponse(
+                    status_code=429,
+                    content=detail,
+                    headers={
+                        "Retry-After": str(retry_after),
+                        **cors_headers  # Include CORS headers
+                    }
+                )
 
     # Proceed with the request if rate limits are not exceeded or for other paths
     response = await call_next(request)

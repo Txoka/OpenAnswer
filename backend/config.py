@@ -48,6 +48,7 @@ class RateLimits(BaseSettings):
     limit_per_ip: int
     limit_total: int
     limit_interval: int
+    enforce_limit_in_localnet: bool
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 

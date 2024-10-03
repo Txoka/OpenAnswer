@@ -7,6 +7,7 @@ from markdown.extensions.toc import TocExtension
 import logging
 from typing import List, Dict, Any
 import json
+import time
 
 def get_human_readable_datetime() -> str:
     """

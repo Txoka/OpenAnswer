@@ -11,3 +11,4 @@ markdown
 beautifulsoup4
 redis
 pydantic_settings
+ipaddress

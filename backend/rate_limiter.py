@@ -12,7 +12,7 @@ class RateLimiter:
         self.per_ip_limit = per_ip_limit
         self.total_limit = total_limit
         self.limit_interval = limit_interval
-        self.total_key = "total_requests"
+        self.total_key = "total-requests"
         self.ip_key_prefix = "ip-requests:"
 
     async def check_limits(self, ip: str):
