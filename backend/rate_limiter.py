@@ -33,19 +33,6 @@ class RateLimiter:
         ip_requests = int(results[2] or 0)
         ip_ttl = results[3]
 
-        # If TTL is -1 (no expiration), set it to limit_interval
-        if total_ttl == -1:
-            await self.redis.expire(self.total_key, self.limit_interval)
-            total_ttl = self.limit_interval
-        elif total_ttl == -2:
-            total_ttl = self.limit_interval
-
-        if ip_ttl == -1:
-            await self.redis.expire(ip_key, self.limit_interval)
-            ip_ttl = self.limit_interval
-        elif ip_ttl == -2:
-            ip_ttl = self.limit_interval
-
         exceeded_limits = []
         retry_times = []
 
@@ -68,6 +55,10 @@ class RateLimiter:
 
         # Increment only if limits are not exceeded
         pipeline = self.redis.pipeline()
+		
+		pipeline.set(self.total_key, 0, ex=self.limit_interval, nx=True)
+		pipeline.set(ip_key, 0, ex=self.limit_interval, nx=True)
+		
         pipeline.incr(self.total_key)
         pipeline.incr(ip_key)
 
