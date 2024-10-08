@@ -55,10 +55,10 @@ class RateLimiter:
 
         # Increment only if limits are not exceeded
         pipeline = self.redis.pipeline()
-		
-		pipeline.set(self.total_key, 0, ex=self.limit_interval, nx=True)
-		pipeline.set(ip_key, 0, ex=self.limit_interval, nx=True)
-		
+        
+        pipeline.set(self.total_key, 0, ex=self.limit_interval, nx=True)
+        pipeline.set(ip_key, 0, ex=self.limit_interval, nx=True)
+        
         pipeline.incr(self.total_key)
         pipeline.incr(ip_key)
 
