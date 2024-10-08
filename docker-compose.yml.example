@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    container_name: redis
+    volumes:
+      - redis-data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+
+  backend:
+    container_name: OpenAnswer_Backend
+    restart: unless-stopped
+    build:
+      context: ./backend
+      target: deploy  # Only use the final stage for running
+    #volumes:
+    #  - ./backend:/app  # This is optional if you don't want hot reloading during development
+    #working_dir: /app
+    ports:
+      - "8118:8118"  # Exposes backend on host port 8118
+    depends_on:
+      - redis
+
+  frontend:
+    container_name: OpenAnswer_Frontend
+    restart: unless-stopped
+    build:
+      context: ./frontend
+      target: deploy  # Only use the final stage for running
+    #volumes:
+    #  - ./frontend:/app  # This is optional if you want live development
+    #working_dir: /app
+    ports:
+      - "3000:3000"  # Exposes frontend on host port 3000
+    depends_on:
+      - backend  # No circular dependency
+
+volumes:
+  redis-data:
