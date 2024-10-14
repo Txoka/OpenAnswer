@@ -6,15 +6,10 @@ local per_ip_limit = {{PER_IP_LIMIT}}
 local total_limit = {{TOTAL_LIMIT}}
 local limit_interval = {{LIMIT_INTERVAL}}
 
--- Initialize total requests
-if redis.call("EXISTS", total_key) == 0 then
-    redis.call("SET", total_key, 0, "EX", limit_interval)
-end
+-- Initialize requests
+redis.call("SET", ip_key, 0, "NX", "EX", limit_interval)
+redis.call("SET", total_key, 0, "NX", "EX", limit_interval)
 
--- Initialize IP requests
-if redis.call("EXISTS", ip_key) == 0 then
-    redis.call("SET", ip_key, 0, "EX", limit_interval)
-end
 
 -- Check per-IP limit
 local current_ip = tonumber(redis.call("GET", ip_key))

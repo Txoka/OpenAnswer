@@ -44,6 +44,8 @@ class RateLimiter:
             LIMIT_INTERVAL=60
         )
 
+        print(script)
+
         return script
     
     def _validate_and_encode_ip(self, ip: str) -> bytes:
