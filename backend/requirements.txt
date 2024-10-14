@@ -12,3 +12,4 @@ beautifulsoup4
 redis
 pydantic_settings
 ipaddress
+mmh3

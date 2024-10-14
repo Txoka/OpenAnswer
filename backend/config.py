@@ -67,6 +67,12 @@ class ProxySettings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
+class IPObfuscationSEttings(BaseSettings):
+    obfuscate_ips: bool
+    secret_salt: str
+
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
+
 class Config(BaseSettings):
     api_keys: APIKeys = Field(default_factory=APIKeys)
     search: SearchSettings = Field(default_factory=SearchSettings)
@@ -78,6 +84,7 @@ class Config(BaseSettings):
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
     proxy: ProxySettings = Field(default_factory=ProxySettings)
+    obfuscation: IPObfuscationSEttings = Field(default_factory=IPObfuscationSEttings)
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
@@ -92,7 +99,8 @@ class Config(BaseSettings):
             "rate_limits": self.rate_limits.model_dump(),
             "logging": self.logging.model_dump(),
             "redis": self.redis.model_dump(),
-            "proxy": self.proxy.model_dump()
+            "proxy": self.proxy.model_dump(),
+            "obfuscation": self.obfuscation.model_dump()
         }
 
 config = Config()

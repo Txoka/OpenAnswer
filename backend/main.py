@@ -72,7 +72,9 @@ async def lifespan(app: FastAPI):
         redis_client=app.state.redis,
         per_ip_limit=config.rate_limits.limit_per_ip,
         total_limit=config.rate_limits.limit_total,
-        limit_interval=config.rate_limits.limit_interval
+        limit_interval=config.rate_limits.limit_interval,
+        obfuscate_ips=config.obfuscation.obfuscate_ips,
+        salt=config.obfuscation.secret_salt
     )
     
     # Create ResearchAssistant instance
