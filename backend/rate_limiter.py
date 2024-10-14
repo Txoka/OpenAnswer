@@ -46,7 +46,7 @@ class RateLimiter:
         # Truncate to 80 bits (10 bytes)
         truncated_hash = full_hash[:9]
         # Encode to base64 for Redis key compatibility
-        return base64.urlsafe_b64encode(truncated_hash)
+        return base64.urlsafe_b64encode(truncated_hash).decode('utf-8')
 
     async def check_limits(self, ip: str) -> dict:
         ip_key = f"{self.ip_key_prefix}{self._hash_ip(ip)}"
