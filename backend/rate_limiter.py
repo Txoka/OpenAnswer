@@ -21,6 +21,28 @@ class RateLimiter:
         self.ip_key_prefix = "ip:"
         self.obfuscate_ips = obfuscate_ips
         self.salt = base64.b64decode(salt)
+
+        self.script_content = self._load_and_format_lua_script("./lua_scripts/rate_limiter.lua")
+        self.script = self.redis.register_script(self.script_content)
+
+    def _load_and_format_lua_script(self, lua_script_path: str) -> str:
+        """
+        Loads the Lua script from the given path and replaces placeholders with actual configuration values using str.format().
+        """
+        try:
+            with open(lua_script_path, 'r') as file:
+                script = file.read()
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Lua script not found at path: {lua_script_path}")
+
+        # Replace placeholders with actual configuration values using str.format()
+        script = script.format(
+            PER_IP_LIMIT=self.per_ip_limit,
+            TOTAL_LIMIT=self.total_limit,
+            LIMIT_INTERVAL=self.limit_interval
+        )
+
+        return script
     
     def _validate_and_encode_ip(self, ip: str) -> bytes:
         """
@@ -28,7 +50,7 @@ class RateLimiter:
         """
         try:
             ip_obj = ip_address(ip)
-            return ip_obj.packed  # Returns the binary representation
+            return ip_obj.packed
         except AddressValueError:
             raise ValueError(f"Invalid IP address format: {ip}")
 
@@ -39,17 +61,12 @@ class RateLimiter:
         if not self.obfuscate_ips:
             return ip
         
-        # Concatenate salt and IP bytes
         hash_input = self.salt + self._validate_and_encode_ip(ip)
-        # Generate 128-bit MurmurHash3
-        full_hash = mmh3.hash_bytes(hash_input, 42)  # seed=42
-        # Truncate to 80 bits (10 bytes)
+        full_hash = mmh3.hash_bytes(hash_input, 42)
         truncated_hash = full_hash[:9]
-        # Encode to base64 for Redis key compatibility
         return base64.urlsafe_b64encode(truncated_hash).decode('utf-8')
 
-    async def check_limits(self, ip: str) -> dict:
-        ip_key = f"{self.ip_key_prefix}{self._hash_ip(ip)}"
+    async def check_limits(self, ip: str):
         """
         Checks and updates the rate limits for a given IP address.
 
@@ -60,56 +77,32 @@ class RateLimiter:
                 "retry_after": int or None
             }
         """
+        try:
+            # Validate and encode the IP address
+            ip_bytes = self._validate_and_encode_ip(ip)
+            # Hash the IP address
+            hashed_ip = self._hash_ip(ip_bytes)
+            ip_key = f"{self.ip_key_prefix}{hashed_ip}"
+            total_key = self.total_key
 
-        # Check current request counts without incrementing
-        pipeline = self.redis.pipeline()
+            # Execute the Lua script atomically
+            result = await self.rate_limit_script(
+                keys=[ip_key, total_key]
+            )
 
-        pipeline.get(self.total_key)
-        pipeline.ttl(self.total_key)
+            allowed = bool(result[0])
+            exceeded = result[1]
+            retry_after = result[2]
 
-        pipeline.get(ip_key)
-        pipeline.ttl(ip_key)
-
-        results = await pipeline.execute()
-        total_requests = int(results[0] or 0)
-        total_ttl = results[1]
-        ip_requests = int(results[2] or 0)
-        ip_ttl = results[3]
-
-        exceeded_limits = []
-        retry_times = []
-
-        if total_requests >= self.total_limit:
-            exceeded_limits.append("global")
-            retry_times.append(total_ttl)
-
-        if ip_requests >= self.per_ip_limit:
-            exceeded_limits.append("ip")
-            retry_times.append(ip_ttl)
-
-        if exceeded_limits:
-            max_retry = max(retry_times)
-            exceeded = exceeded_limits[retry_times.index(max_retry)]
             return {
-                "allowed": False,
+                "allowed": allowed,
                 "exceeded": exceeded,
-                "retry_after": max_retry
+                "retry_after": retry_after
             }
 
-        # Increment only if limits are not exceeded
-        pipeline = self.redis.pipeline()
-        
-        pipeline.set(self.total_key, 0, ex=self.limit_interval, nx=True)
-        pipeline.set(ip_key, 0, ex=self.limit_interval, nx=True)
-        
-        pipeline.incr(self.total_key)
-        pipeline.incr(ip_key)
-
-        # Execute the increments
-        await pipeline.execute()
-
-        return {
-            "allowed": True,
-            "exceeded": None,
-            "retry_after": None
-        }
+        except Exception as e:
+            return {
+                "allowed": False,
+                "exceeded": "ERROR",
+                "retry_after": None
+            }
