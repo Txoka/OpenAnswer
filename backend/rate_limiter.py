@@ -90,7 +90,7 @@ class RateLimiter:
             ip_key = f"{self.ip_key_prefix}{hashed_ip}"
 
             # Execute the Lua script atomically
-            result = await self.rate_limit_script(
+            result = await self.script(
                 keys=[ip_key, self.total_key]
             )
 
