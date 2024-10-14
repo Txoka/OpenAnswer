@@ -103,9 +103,21 @@ class RateLimiter:
                 "retry_after": retry_after
             }
 
+        except ValueError as ve:
+            return {
+                "allowed": False,
+                "exceeded": "INVALID IP ERROR",
+                "retry_after": None
+            }
+        except aioredis.RedisError as re:
+            return {
+                "allowed": False,
+                "exceeded": "REDIS ERROR",
+                "retry_after": None
+            }
         except Exception as e:
             return {
                 "allowed": False,
-                "exceeded": "ERROR",
+                "exceeded": "UNKNOWN ERROR",
                 "retry_after": None
             }
