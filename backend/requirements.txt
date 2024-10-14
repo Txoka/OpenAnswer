@@ -2,7 +2,6 @@ fastapi
 uvicorn
 pydantic
 openai
-google-api-python-client
 crawl4ai
 pyyaml
 python-dotenv

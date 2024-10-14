@@ -2,9 +2,9 @@ local total_key = KEYS[1]
 local ip_key = KEYS[2]
 
 -- Embedded configuration parameters
-local per_ip_limit = {PER_IP_LIMIT}
-local total_limit = {TOTAL_LIMIT}
-local limit_interval = {LIMIT_INTERVAL}
+local per_ip_limit = {{PER_IP_LIMIT}}
+local total_limit = {{TOTAL_LIMIT}}
+local limit_interval = {{LIMIT_INTERVAL}}
 
 -- Initialize total requests
 if redis.call("EXISTS", total_key) == 0 then

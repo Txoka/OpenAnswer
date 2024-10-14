@@ -2,6 +2,7 @@ import redis.asyncio as aioredis
 import base64
 import mmh3
 from ipaddress import ip_address, AddressValueError
+from jinja2 import Template
 
 class RateLimiter:
     def __init__(
@@ -36,10 +37,11 @@ class RateLimiter:
             raise FileNotFoundError(f"Lua script not found at path: {lua_script_path}")
 
         # Replace placeholders with actual configuration values using str.format()
-        script = script.format(
-            PER_IP_LIMIT=self.per_ip_limit,
-            TOTAL_LIMIT=self.total_limit,
-            LIMIT_INTERVAL=self.limit_interval
+        template = Template(script)
+        script = template.render(
+            PER_IP_LIMIT=100,
+            TOTAL_LIMIT=1000,
+            LIMIT_INTERVAL=60
         )
 
         return script
@@ -83,11 +85,10 @@ class RateLimiter:
             # Hash the IP address
             hashed_ip = self._hash_ip(ip_bytes)
             ip_key = f"{self.ip_key_prefix}{hashed_ip}"
-            total_key = self.total_key
 
             # Execute the Lua script atomically
             result = await self.rate_limit_script(
-                keys=[ip_key, total_key]
+                keys=[ip_key, self.total_key]
             )
 
             allowed = bool(result[0])
