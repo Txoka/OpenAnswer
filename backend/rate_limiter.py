@@ -3,6 +3,7 @@ import base64
 import mmh3
 from ipaddress import ip_address, AddressValueError
 from jinja2 import Template
+import traceback
 
 class RateLimiter:
     def __init__(
@@ -116,6 +117,11 @@ class RateLimiter:
                 "retry_after": None
             }
         except Exception as e:
+            print(f"An error occurred: {e}")
+    
+            # Print the full traceback
+            traceback.print_exc()
+
             return {
                 "allowed": False,
                 "exceeded": "UNKNOWN ERROR",
