@@ -39,9 +39,9 @@ class RateLimiter:
         # Replace placeholders with actual configuration values using str.format()
         template = Template(script)
         script = template.render(
-            PER_IP_LIMIT=100,
-            TOTAL_LIMIT=1000,
-            LIMIT_INTERVAL=60
+            PER_IP_LIMIT=self.per_ip_limit,
+            TOTAL_LIMIT=self.total_limit,
+            LIMIT_INTERVAL=self.limit_interval
         )
 
         print(script)
