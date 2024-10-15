@@ -71,7 +71,7 @@ class RateLimiter:
 
     async def _run_script(self, ip_key):
         result = await self.script(
-            keys=[ip_key, self.total_key]
+            keys=[self.total_key, ip_key]
         )
         print(len(result))
 
