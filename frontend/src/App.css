@@ -37,17 +37,6 @@
   --powered-by-text: gray;
 }
 
-/* Adjust link colors in dark theme */
-a {
-  color: #82aaff; /* A softer blue for the dark theme */
-  text-decoration: underline; /* Keeps the underline to ensure readability */
-  transition: color 0.3s ease;
-}
-
-a:hover {
-  color: #b3c7ff; /* Slightly lighter blue on hover for contrast */
-}
-
 /* Apply variables */
 html, body {
   height: 100%;
@@ -182,6 +171,16 @@ a[data-footnote-ref="true"]::before {
 
 a[data-footnote-ref="true"]::after {
   content: "]";
+}
+
+a {
+  color: #82aaff;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #b3c7ff;
 }
 
 .open-answer {
