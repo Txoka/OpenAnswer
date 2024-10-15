@@ -18,8 +18,8 @@ if tonumber(redis.call("GET", total_key) or 0) >= total_limit then
 end
 
 -- Increment counts and set expiration
-if redis.call("INCR", total_key) == 1 then redis.call("EXPIRE", total_key, ttl) end
-if redis.call("INCR", ip_key) == 1 then redis.call("EXPIRE", ip_key, ttl) end
+if redis.call("INCR", total_key) == 1 then redis.call("EXPIRE", total_key, limit_interval) end
+if redis.call("INCR", ip_key) == 1 then redis.call("EXPIRE", ip_key, limit_interval) end
 
 -- Return allow message
 return {1, nil, nil}
