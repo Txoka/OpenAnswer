@@ -109,14 +109,18 @@ class RateLimiter:
             }
 
         except ValueError as ve:
+            print(f"An error occurred: {ve}")
+            traceback.print_exc()
+            
             return {
                 "allowed": False,
                 "exceeded": "INVALID IP ERROR",
                 "retry_after": None
             }
         except aioredis.RedisError as re:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred: {re}")
             traceback.print_exc()
+
             return {
                 "allowed": False,
                 "exceeded": "REDIS ERROR",
