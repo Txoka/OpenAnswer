@@ -40,6 +40,7 @@ class RateLimiter:
         # Replace placeholders with actual configuration values using str.format()
         template = Template(script)
         script = template.render(
+            TOTAL_KEY=self.total_key,
             PER_IP_LIMIT=self.per_ip_limit,
             TOTAL_LIMIT=self.total_limit,
             LIMIT_INTERVAL=self.limit_interval
@@ -65,13 +66,12 @@ class RateLimiter:
             return ip
         
         hash_input = self.salt + self._validate_and_encode_ip(ip)
-        full_hash = mmh3.hash_bytes(hash_input, 42)
-        truncated_hash = full_hash[:9]
-        return base64.urlsafe_b64encode(truncated_hash).decode('utf-8')
+        hash = mmh3.hash_bytes(hash_input, 42)[:9]
+        return base64.urlsafe_b64encode(hash).decode('utf-8')
 
     async def _run_script(self, ip_key):
         result = await self.script(
-            keys=[self.total_key, ip_key]
+            keys=[ip_key]
         )
         print(len(result))
 
