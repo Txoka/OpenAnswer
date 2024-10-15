@@ -8,10 +8,6 @@ import './App.css';
 
 const API_ENDPOINT = `${window.location.protocol}//${window.location.hostname}:8118/api/answer`;
 
-// Custom components for footnotes
-const FootnoteReference = ({ identifier }) => <sup>[{identifier}]</sup>;
-const FootnoteBackReference = ({ identifier }) => <a href={`#fnref-${identifier}`} className="footnote-backref">↩</a>;
-
 function formatTime(seconds) {
   const days = Math.floor(seconds / (24 * 60 * 60));
   const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
