@@ -218,9 +218,7 @@ export default function ResearchAssistant() {
                       {children}
                     </code>
                   )
-                },
-                footnoteReference: FootnoteReference,
-                footnoteBackReference: FootnoteBackReference
+                }
               }}
             >
               {answer}
