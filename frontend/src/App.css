@@ -1,9 +1,52 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+/* Define light and dark theme variables */
+:root {
+  --background-color: #f0f4f8;
+  --container-bg: #ffffff;
+  --text-color: #333;
+  --title-color: #3a86ff;
+  --input-border: #e0e0e0;
+  --input-focus-border: #3a86ff;
+  --button-bg: #3a86ff;
+  --button-hover-bg: #2a75e6;
+  --button-disabled-bg: #a0c4ff;
+  --error-bg: #ffcccb;
+  --error-border: #ff6b6b;
+  --error-text: #d63031;
+  --answer-bg: #f8f9fa;
+  --code-bg: #2d3748;
+  --code-text: #e2e8f0;
+  --powered-by-text: gray;
+}
+
+[data-theme="dark"] {
+  --background-color: #1e1e1e;
+  --container-bg: #2d2d2d;
+  --text-color: #f0f0f0;
+  --title-color: #3a86ff;
+  --input-border: #555;
+  --input-focus-border: #3a86ff;
+  --button-bg: #3a86ff;
+  --button-hover-bg: #2a75e6;
+  --button-disabled-bg: #555;
+  --error-bg: #ff6b6b;
+  --error-border: #ff4c4c;
+  --error-text: #ffdddd;
+  --answer-bg: #3a3a3a;
+  --code-bg: #1e1e1e;
+  --code-text: #e2e8f0;
+  --powered-by-text: gray;
+}
+
+/* Apply variables */
+html, body {
+  height: 100%;
+}
 
 body {
   font-family: 'Poppins', sans-serif;
-  background-color: #f0f4f8;
-  color: #333;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
 }
 
 .container {
@@ -13,15 +56,16 @@ body {
 }
 
 .research-assistant {
-  background-color: #ffffff;
+  background-color: var(--container-bg);
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 2rem;
+  transition: background-color 0.3s;
 }
 
 .title {
   font-size: 2.5rem;
-  color: #3a86ff;
+  color: var(--title-color);
   text-align: center;
   margin-bottom: 2rem;
   margin-top: 0;
@@ -36,19 +80,21 @@ body {
 .input {
   flex-grow: 1;
   padding: 0.75rem 1rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--input-border);
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
+  background-color: transparent;
+  color: var(--text-color);
 }
 
 .input:focus {
   outline: none;
-  border-color: #3a86ff;
+  border-color: var(--input-focus-border);
 }
 
 .button {
-  background-color: #3a86ff;
+  background-color: var(--button-bg);
   color: white;
   border: none;
   border-radius: 8px;
@@ -63,11 +109,11 @@ body {
 }
 
 .button:hover {
-  background-color: #2a75e6;
+  background-color: var(--button-hover-bg);
 }
 
 .button:disabled {
-  background-color: #a0c4ff;
+  background-color: var(--button-disabled-bg);
   cursor: not-allowed;
 }
 
@@ -76,7 +122,7 @@ body {
   width: 16px;
   height: 16px;
   border: 3px solid white;
-  border-top: 3px solid #2a75e6;
+  border-top: 3px solid var(--button-hover-bg);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -88,30 +134,31 @@ body {
 }
 
 .error {
-  background-color: #ffcccb;
-  border-left: 4px solid #ff6b6b;
-  color: #d63031;
+  background-color: var(--error-bg);
+  border-left: 4px solid var(--error-border);
+  color: var(--error-text);
   padding: 1rem;
   margin-bottom: 1rem;
   border-radius: 4px;
 }
 
 .answer {
-  background-color: #f8f9fa;
+  background-color: var(--answer-bg);
   border-radius: 8px;
   padding: 1.5rem;
   margin-top: 2rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.3s;
 }
 
 .answer h2 {
-  color: #3a86ff;
+  color: var(--title-color);
   margin-bottom: 1rem;
 }
 
 .answer pre {
-  background-color: #2d3748;
-  color: #e2e8f0;
+  background-color: var(--code-bg);
+  color: var(--code-text);
   padding: 1rem;
   border-radius: 4px;
   overflow-x: auto;
@@ -135,7 +182,7 @@ a[data-footnote-ref="true"]::after {
 .powered-by {
   margin-top: 3rem;
   font-size: 0.8rem;
-  color: gray;
+  color: var(--powered-by-text);
   margin-bottom: -1rem;
   text-align: center;
 }
@@ -147,4 +194,17 @@ a[data-footnote-ref="true"]::after {
 
 .powered-by a:hover {
   text-decoration: underline;
+}
+
+/* Toggle Button Styles */
+.theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-color);
+  font-size: 1.5rem;
+  transition: color 0.3s;
 }

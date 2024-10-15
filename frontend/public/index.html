@@ -5,21 +5,41 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
+
+    
+    <script>
+      (function() {
+        try {
+          const storedTheme = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const theme = storedTheme || (prefersDark ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+          
+          // Set the initial background color to prevent flash
+          const backgroundColor = theme === 'dark' ? '#1e1e1e' : '#f0f4f8';
+          document.documentElement.style.backgroundColor = backgroundColor;
+        } catch (e) {
+          console.error('Error setting theme:', e);
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="%PUBLIC_URL%/App.css" />
+    
+
     <!-- Meta Description -->
     <meta name="description" content="OpenAnswer is a smart research assistant that provides real-time answers by combining Google Search and large language models (LLMs). Get relevant URLs and comprehensive responses.">
 
     <!-- Open Graph Meta Tags for social sharing -->
     <meta property="og:title" content="OpenAnswer - Research Assistant" />
     <meta property="og:description" content="OpenAnswer is a smart research assistant that provides real-time answers by combining Google Search and large language models (LLMs). Get relevant URLs and comprehensive responses." />
-    <meta property="og:image" content="/path_to_your_image.png" />
-    <meta property="og:url" content="https://your-app-url.com" />
+    <meta property="og:image" content="%PUBLIC_URL%/favicon.icog" />
     <meta property="og:type" content="website" />
 
     <!-- Twitter Meta Tags for better Twitter card integration -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="OpenAnswer - Research Assistant" />
     <meta name="twitter:description" content="OpenAnswer is a smart research assistant that provides real-time answers by combining Google Search and large language models (LLMs). Get relevant URLs and comprehensive responses." />
-    <meta name="twitter:image" content="/path_to_your_image.png" />
+    <meta name="twitter:image" content="%PUBLIC_URL%/favicon.ico" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
@@ -35,6 +55,7 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
+
     <title>OpenAnswer - Research Assistant</title>
   </head>
   <body>

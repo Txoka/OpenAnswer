@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { FaSun, FaMoon } from 'react-icons/fa'; // Import icons
 import './App.css';
 
-const API_ENDPOINT = `${window.location.protocol}//${window.location.hostname}:8118/api/answer`;;
+const API_ENDPOINT = `${window.location.protocol}//${window.location.hostname}:8118/api/answer`;
 
 // Custom components for footnotes
 const FootnoteReference = ({ identifier }) => <sup>[{identifier}]</sup>;
@@ -33,6 +34,45 @@ export default function ResearchAssistant() {
   const [relevantUrls, setRelevantUrls] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Initialize theme based on the data-theme attribute set by the inline script
+  const getInitialTheme = () => {
+    if (typeof window !== 'undefined' && window.document.documentElement) {
+      return window.document.documentElement.getAttribute('data-theme') || 'light';
+    }
+    return 'light';
+  };
+
+  const [theme, setTheme] = useState(getInitialTheme);
+
+  // Function to toggle theme
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    // Optional: Update background color to prevent flash during toggle
+    const backgroundColor = newTheme === 'dark' ? '#1e1e1e' : '#f0f4f8';
+    document.documentElement.style.backgroundColor = backgroundColor;
+  };
+
+  // Listen for changes in localStorage (optional, for multi-tab support)
+  useEffect(() => {
+    const handleStorage = (event) => {
+      if (event.key === 'theme') {
+        const newTheme = event.newValue || 'light';
+        setTheme(newTheme);
+        document.documentElement.setAttribute('data-theme', newTheme);
+        
+        // Optional: Update background color
+        const backgroundColor = newTheme === 'dark' ? '#1e1e1e' : '#f0f4f8';
+        document.documentElement.style.backgroundColor = backgroundColor;
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -91,6 +131,11 @@ export default function ResearchAssistant() {
 
   return (
     <div className="container">
+      {/* Theme Toggle Button */}
+      <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle Theme">
+        {theme === 'light' ? <FaMoon /> : <FaSun />}
+      </button>
+
       <div className="research-assistant">
         {/* OpenAnswer label above the title */}
         <span className="open-answer">OpenAnswer</span>
