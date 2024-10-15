@@ -115,6 +115,8 @@ class RateLimiter:
                 "retry_after": None
             }
         except aioredis.RedisError as re:
+            print(f"An error occurred: {e}")
+            traceback.print_exc()
             return {
                 "allowed": False,
                 "exceeded": "REDIS ERROR",
