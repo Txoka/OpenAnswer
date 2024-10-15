@@ -2,7 +2,7 @@
 local ip_key = KEYS[1]
 
 -- Embedded configuration parameters
-local total_key = {{TOTAL_KEY}}
+local total_key = "{{TOTAL_KEY}}"
 local per_ip_limit = {{PER_IP_LIMIT}}
 local total_limit = {{TOTAL_LIMIT}}
 local limit_interval = {{LIMIT_INTERVAL}}
