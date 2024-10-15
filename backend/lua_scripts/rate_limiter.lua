@@ -8,14 +8,12 @@ local total_limit = {{TOTAL_LIMIT}}
 local limit_interval = {{LIMIT_INTERVAL}}
 
 -- Check per-IP limit
-local current_ip = tonumber(redis.call("GET", ip_key))
-if current_ip >= per_ip_limit then
+if tonumber(redis.call("GET", ip_key) or 0) >= per_ip_limit then
     return {0, "ip", redis.call("TTL", ip_key)} -- Return deny message
 end
 
 -- Check global limit
-local current_total = tonumber(redis.call("GET", total_key) or 0)
-if current_total >= total_limit then
+if tonumber(redis.call("GET", total_key) or 0) >= total_limit then
     return {0, "global", redis.call("TTL", total_key)} -- Return deny message
 end
 
