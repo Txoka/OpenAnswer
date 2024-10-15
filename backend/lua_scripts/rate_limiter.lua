@@ -14,7 +14,7 @@ if current_ip >= per_ip_limit then
 end
 
 -- Check global limit
-local current_total = tonumber(redis.call("GET", total_key))
+local current_total = tonumber(redis.call("GET", total_key) or 0)
 if current_total >= total_limit then
     return {0, "global", redis.call("TTL", total_key)} -- Return deny message
 end
