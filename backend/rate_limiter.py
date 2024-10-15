@@ -45,8 +45,6 @@ class RateLimiter:
             LIMIT_INTERVAL=self.limit_interval
         )
 
-        print(script)
-
         return script
     
     def _validate_and_encode_ip(self, ip: str) -> bytes:
@@ -71,6 +69,17 @@ class RateLimiter:
         truncated_hash = full_hash[:9]
         return base64.urlsafe_b64encode(truncated_hash).decode('utf-8')
 
+    async def _run_script(self, ip_key):
+        result = await self.script(
+            keys=[ip_key, self.total_key]
+        )
+
+        allowed = bool(result[0])
+        exceeded = result[1] if len(result) > 1 else None
+        retry_after = result[2] if len(result) > 2 else None
+        
+        return allowed, exceeded, retry_after
+
     async def check_limits(self, ip: str):
         """
         Checks and updates the rate limits for a given IP address.
@@ -90,13 +99,7 @@ class RateLimiter:
             ip_key = f"{self.ip_key_prefix}{hashed_ip}"
 
             # Execute the Lua script atomically
-            result = await self.script(
-                keys=[ip_key, self.total_key]
-            )
-
-            allowed = bool(result[0])
-            exceeded = result[1]
-            retry_after = result[2]
+            allowed, exceeded, retry_after = self._run_script(ip_key)
 
             return {
                 "allowed": allowed,
