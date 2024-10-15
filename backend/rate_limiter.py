@@ -118,8 +118,6 @@ class RateLimiter:
             }
         except Exception as e:
             print(f"An error occurred: {e}")
-    
-            # Print the full traceback
             traceback.print_exc()
 
             return {

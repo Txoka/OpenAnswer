@@ -29,4 +29,4 @@ end
 redis.call("INCR", total_key)
 redis.call("INCR", ip_key)
 
-return {1, nil, nil}
+return {1, "none", 0}
