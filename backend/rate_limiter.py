@@ -73,6 +73,7 @@ class RateLimiter:
         result = await self.script(
             keys=[ip_key, self.total_key]
         )
+        print(len(result))
 
         allowed = bool(result[0])
         exceeded = result[1] if len(result) > 1 else None
@@ -99,7 +100,7 @@ class RateLimiter:
             ip_key = f"{self.ip_key_prefix}{hashed_ip}"
 
             # Execute the Lua script atomically
-            allowed, exceeded, retry_after = self._run_script(ip_key)
+            allowed, exceeded, retry_after = await self._run_script(ip_key)
 
             return {
                 "allowed": allowed,
