@@ -39,16 +39,20 @@
 
 /* Apply variables */
 
-html, body, #root {
-  margin: 0;
-  padding: 0;
-  height: 100%;
+html, body {
+  height: 100%;    /* Make sure the body and html take the full height of the viewport */
+  margin: 0;       /* Remove default margins */
+  padding: 0;      /* Remove default padding */
+}
+
+#root, .App {
+  min-height: 100vh;  /* Ensure the content fills at least the full viewport height */
+  display: flex;
+  flex-direction: column;
 }
 
 .App {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  flex-grow: 1; /* Allow the app to grow and fill the available space */
 }
 
 body {
