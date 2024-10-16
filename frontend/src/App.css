@@ -38,9 +38,18 @@
 }
 
 /* Apply variables */
-html, body {
-  height: 100%;
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
   box-sizing: border-box;
+}
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 body {
