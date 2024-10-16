@@ -13,9 +13,17 @@
   Implement data extraction llm directly on crawler according to crawl4ai documentation.
   Implement as another api call, /api/answer-pro.
 
+- [ ] **Add website metadata extractor**
+
 ## Frontend
 - [x] **Add frontend messages for rate limiting**
   Display clear and concise error messages on the frontend when users hit the rate limit. Messages should include retry timing information for a better user experience.
 
 - [ ] **Dynamic streaming based frontend**
   Make it fancy, show in real time what model is doing and what webs its crawling and stuff. Pretty self explanatory.
+
+- [ ] **Load and display website metadata on Relevant URL section**
+  Call backend for metadata on each url and display it.
+
+- [ ] **Fix theme bug**
+  Reproduction: ask something, scroll to the bottom, switch themes.
