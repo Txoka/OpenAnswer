@@ -11,6 +11,8 @@ RUN npm run build
 FROM node:19-alpine AS deploy
 
 WORKDIR /app
+RUN npm install -g serve@13.0.2
+
 COPY --from=builder /app/build /app/build
 
 CMD ["npx", "serve", "-s", "build", "-l", "3000"]
