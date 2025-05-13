@@ -24,6 +24,3 @@
 
 - [ ] **Load and display website metadata on Relevant URL section**
   Call backend for metadata on each url and display it.
-
-- [ ] **Fix theme bug**
-  Reproduction: ask something, scroll to the bottom, switch themes.
